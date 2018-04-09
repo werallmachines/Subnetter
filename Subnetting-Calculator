@@ -1,0 +1,60 @@
+#!/usr/bin/env python3
+
+IP = ''
+network_id = ''
+subnet_id = ''
+subnet_mask = ''
+network_class = ''
+
+def determine_class():
+    global network_id
+
+    IP_octets = IP.split('.')
+  
+    if <= '1' <= IP_octets[0] <= '126':
+        network_id = 'A'
+    elif <= '128' <= IP_octets[0] <= '191':
+        network_id = 'B'
+    elif <= '192' <= IP_octets[0] <= '223':
+        network_id = 'C'
+       
+def determine_subnet():
+    global subnet_id
+    
+    zero_subnet = []
+    resident_subnet_id = []
+    subnet_range = []
+    
+    no_of_subnets = ''
+    no_of_hosts_per = ''
+    broadcast = ''
+    
+    IP_split = IP.split('.')
+    mask_split = subnet_mask.split('.')
+    if network_class == 'A':
+        subnet_id.append(IP_split[0])
+        zero_subnet.append(IP_split[0])
+        for (IP_octet, mask_octet) in zip(IP_split[1:], mask_split[1:]):
+            if mask_octet == '255':
+                subnet_id.append(IP_octet)
+                zero_subnet.append(IP_octet)
+            else:
+                block_size = 256 - mask_octet
+                subnet_range = range(0, 256, block_size)
+                
+
+    elif network_class == 'B':
+        network_octet = IP.split('.')[:2]
+        interesting_octets = subnet_octets[2:]
+       
+    elif network_class == 'C':
+        network_octet = IP.split('.')[:4]
+        interesting_octets = subnet_octets[-1]
+        
+    
+ def print_response(zero_subnet, resident_subnet_id, subnet_range,
+                    no_of_subnets, no_of_hosts_per, broadcast):
+     pass
+            
+    
+        
