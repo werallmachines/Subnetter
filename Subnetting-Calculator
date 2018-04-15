@@ -11,14 +11,17 @@ def determine_class():
 
     IP_octets = IP.split('.')
   
-    if <= '1' <= IP_octets[0] <= '126':
+    if 1 <= int(IP_octets[0]) <= 126:
         network_id = 'A'
-    elif <= '128' <= IP_octets[0] <= '191':
+        determine_subnet(network_id)
+    elif 128 <= int(IP_octets[0]) <= 191:
         network_id = 'B'
-    elif <= '192' <= IP_octets[0] <= '223':
+        determine_subnet(network_id)
+    elif 192 <= int(IP_octets[0]) <= 223:
         network_id = 'C'
+        determine_subnet(network_id)
        
-def determine_subnet():
+def determine_subnet_id():
     global subnet_id
     
     zero_subnet = []
@@ -31,30 +34,34 @@ def determine_subnet():
     
     IP_split = IP.split('.')
     mask_split = subnet_mask.split('.')
-    if network_class == 'A':
-        subnet_id.append(IP_split[0])
-        zero_subnet.append(IP_split[0])
-        for (IP_octet, mask_octet) in zip(IP_split[1:], mask_split[1:]):
-            if mask_octet == '255':
-                subnet_id.append(IP_octet)
-                zero_subnet.append(IP_octet)
-            else:
-                block_size = 256 - mask_octet
-                subnet_range = range(0, 256, block_size)
-                
 
+    if network_class == 'A':
+        network_id = IP_split[0]
+        subnet_id = zero_subnet = IP_split[0]
+        IP_split[0] = []
     elif network_class == 'B':
-        network_octet = IP.split('.')[:2]
-        interesting_octets = subnet_octets[2:]
-       
+        network_id = IP_split[:2]
+        subnet_id = zero_subnet = IP_split[:2]
+        IP_split[:2] = []
     elif network_class == 'C':
-        network_octet = IP.split('.')[:4]
-        interesting_octets = subnet_octets[-1]
+        network_id = IP_split[:4]
+        subnet_id = zero_subnet = IP_split[:4]
+        IP_split[:4] = []
         
-    
+    for (IP_octet, mask_octet) in zip(IP_split, mask_split): # mask_split will be offset, fix
+        if mask_octet == '255':
+            subnet_id.append(IP_octet) # must be better way to do this
+            zero_subnet.append(IP_octet)
+        else:
+            block_size = 256 - mask_octet
+            subnet_range = range(0, 256, block_size)
+            for block in len(block_size):
+                if IP_octet >= block_size[block]: 
+                    if IP_octet <= block_size[block+1]:
+                        subnet_id.append(block_size[block])
+                    
+            
+        
+
  def print_response(zero_subnet, resident_subnet_id, subnet_range,
                     no_of_subnets, no_of_hosts_per, broadcast):
-     pass
-            
-    
-        
