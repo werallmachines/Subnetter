@@ -1,67 +1,88 @@
 #!/usr/bin/env python3
 
-IP = ''
+IP = '192.168.2.29'
+subnet_mask = '255.255.255.128'
+network_class = ''
 network_id = ''
 subnet_id = ''
-subnet_mask = ''
-network_class = ''
 
 def determine_class():
-    global network_id
+    global network_class
 
     IP_octets = IP.split('.')
-  
+
     if 1 <= int(IP_octets[0]) <= 126:
-        network_id = 'A'
-        determine_subnet(network_id)
+        network_class = 'A'
+        determine_subnet()
     elif 128 <= int(IP_octets[0]) <= 191:
-        network_id = 'B'
-        determine_subnet(network_id)
+        network_class = 'B'
+        determine_subnet()
     elif 192 <= int(IP_octets[0]) <= 223:
-        network_id = 'C'
-        determine_subnet(network_id)
-       
+        network_class = 'C'
+        determine_subnet_id()
+
 def determine_subnet_id():
+    global network_id
     global subnet_id
-    
+
     zero_subnet = []
     resident_subnet_id = []
     subnet_range = []
-    
+
     no_of_subnets = ''
     no_of_hosts_per = ''
     broadcast = ''
-    
+
     IP_split = IP.split('.')
     mask_split = subnet_mask.split('.')
 
     if network_class == 'A':
-        network_id = IP_split[0]
+        network_id = IP_split[0] + '.0' + '.0' + '.0' # network ID created
         subnet_id = zero_subnet = IP_split[0]
-        IP_split[0] = []
+        del IP_split[0]
+        del mask_split[0]
     elif network_class == 'B':
-        network_id = IP_split[:2]
+        network_id = '.'.join(IP_split[:2]) + '.0' + '.0' # network ID created
         subnet_id = zero_subnet = IP_split[:2]
-        IP_split[:2] = []
+        del IP_split[:2]
+        del mask_split[:2]
     elif network_class == 'C':
-        network_id = IP_split[:4]
-        subnet_id = zero_subnet = IP_split[:4]
-        IP_split[:4] = []
-        
-    for (IP_octet, mask_octet) in zip(IP_split, mask_split): # mask_split will be offset, fix
-        if mask_octet == '255':
-            subnet_id.append(IP_octet) # must be better way to do this
-            zero_subnet.append(IP_octet)
-        else:
-            block_size = 256 - mask_octet
-            subnet_range = range(0, 256, block_size)
-            for block in len(block_size):
-                if IP_octet >= block_size[block]: 
-                    if IP_octet <= block_size[block+1]:
-                        subnet_id.append(block_size[block])
-                    
-            
-        
+        network_id = '.'.join(IP_split[:3]) + '.0' # network ID created
+        subnet_id = zero_subnet = IP_split[:3]
+        del IP_split[:3]
+        del mask_split[:3]
 
- def print_response(zero_subnet, resident_subnet_id, subnet_range,
+    for (IP_octet, mask_octet) in zip(IP_split, mask_split):
+        if mask_octet == '255': # if the mask octet is 255, append the IP octet to the subnet ID
+            subnet_id.append(IP_octet)
+            zero_subnet.append(IP_octet)
+        elif mask_octet == '0': # if the mask octet is 0, append a 0 to the subnet ID
+            subnet_id.append('0')
+            zero_subnet.append('0')
+        elif mask_octet > '0': # this tests for the interesting octet, and does the math
+            if mask_octet < '255':
+                block_size = 256 - int(mask_octet)
+                subnet_range = range(0, 256, block_size)
+                for block in range(len(subnet_range)):
+                    if IP_octet >= subnet_range[block]:
+                        try: # check for index error in case we test outside the subnet range
+                            if IP_octet < subnet_range[block+1]:
+                                subnet_id.append(str(subnet_range[block]))
+                        except IndexError:
+                            subnet_id.append(str(subnet_range[block]))
+
+    subnet_id = '.'.join(subnet_id)
+
+    return network_id, subnet_id
+
+def format_response(zero_subnet, resident_subnet_id, subnet_range,
                     no_of_subnets, no_of_hosts_per, broadcast):
+    pass
+
+def print_response():
+    pass
+
+if __name__ == '__main__':
+    determine_class()
+    print('Network ID: ' + network_id)
+    print('Subnet ID: ' + subnet_id)
